@@ -27,13 +27,18 @@ public class Coordinate {
             w = 1;
         } else w = 1;
     }
+
     public void normalizeVec() {
         if (Math.abs(x) <= 1 && Math.abs(y) <= 1 && Math.abs(z) <= 1) {
             return;
         }
-        double len = Math.sqrt(x*x + y*y + z*z);
+        double len = Math.sqrt(x * x + y * y + z * z);
         x = x / len;
         y = y / len;
         z = z / len;
+    }
+
+    public Coordinate copy() {
+        return new Coordinate(x, y, z, w);
     }
 }

@@ -1,15 +1,14 @@
-package com.bennyplo.android_mooc_graphics_3d
+package com.bennyplo.android_mooc_graphics_3d.robot
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.view.View
+import com.bennyplo.android_mooc_graphics_3d.*
 
-class DrawView(context: Context?) : View(context, null) {
-    private val sourceSet: List<DrawableObject> = listOf(cube(), entrance(), circle())
+class TestingHalfLinksView(context: Context?) : View(context, null) {
+    private val sourceSet: List<DrawableObject> = listOf(twoConnectedeCubes())
 
-    var setup: (DrawView.() -> Unit)? = null
+    var setup: (TestingHalfLinksView.() -> Unit)? = null
 
     init {
         invalidate() //update the view
@@ -26,6 +25,11 @@ class DrawView(context: Context?) : View(context, null) {
         super.onDraw(canvas)
     }
 
+    fun resetAll() {
+        sourceSet.forEach {
+            it.restore()
+        }
+    }
 
     fun drawAll(canvas: Canvas) {
         sourceSet.forEach {
@@ -54,12 +58,6 @@ class DrawView(context: Context?) : View(context, null) {
     fun rotateZ(zTheta: Double) {
         sourceSet.forEach {
             it.rotateZ(zTheta)
-        }
-    }
-
-    fun resetAll() {
-        sourceSet.forEach {
-            it.restore()
         }
     }
 
@@ -93,23 +91,6 @@ class DrawView(context: Context?) : View(context, null) {
     fun translate(dx: Double, dy: Double, dz: Double) {
         sourceSet.forEach {
             it.translate(dx, dy, dz)
-        }
-    }
-
-    companion object {
-        fun getIdentityMatrix(): Array<DoubleArray> { //return an 4x4 identity matrix
-            val matrix = Array(4) { DoubleArray(4) }
-
-            for (i in matrix.indices) {
-                for (g in matrix[i].indices) {
-                    if (i == g) {
-                        matrix[i][g] = 1.0;
-                    } else {
-                        matrix[i][g] = 0.0;
-                    }
-                }
-            }
-            return matrix
         }
     }
 }
