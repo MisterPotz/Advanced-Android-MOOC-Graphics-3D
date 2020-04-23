@@ -2,6 +2,13 @@ package com.bennyplo.android_mooc_graphics_3d;
 //*********************************************
 //* Homogeneous coordinate in 3D space
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+
+import java.util.Objects;
+
+import static java.lang.Math.abs;
+
 public class Coordinate {
     public double x, y, z, w;
 
@@ -29,7 +36,7 @@ public class Coordinate {
     }
 
     public void normalizeVec() {
-        if (Math.abs(x) <= 1 && Math.abs(y) <= 1 && Math.abs(z) <= 1) {
+        if (abs(x) <= 1 && abs(y) <= 1 && abs(z) <= 1) {
             return;
         }
         double len = Math.sqrt(x * x + y * y + z * z);
@@ -40,5 +47,34 @@ public class Coordinate {
 
     public Coordinate copy() {
         return new Coordinate(x, y, z, w);
+    }
+
+    private boolean almostEqual(double expected, double target) {
+        if (target == 0.0 || expected == 0.0) {
+            return abs(expected - target) <= 0.0000001;
+        }
+        double relation = abs(target / expected);
+        return relation <= 1.0000001 && relation >= 0.9999999;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Coordinate that = (Coordinate) o;
+        return almostEqual(this.x, that.x) && almostEqual(this.y, that.y) &&
+                almostEqual(this.z, that.z) && almostEqual(this.w, that.w);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z, w);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @Override
+    public String toString() {
+        return ("Coordinate "+ this.hashCode() + " x:" + x + " y:" + y + " z:" + z + " w:" + w);
     }
 }

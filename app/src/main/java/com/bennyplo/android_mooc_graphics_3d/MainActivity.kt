@@ -1,51 +1,99 @@
 package com.bennyplo.android_mooc_graphics_3d
 
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
-import com.bennyplo.android_mooc_graphics_3d.robot.TestingHalfLinksView
+import android.util.Log
+import com.bennyplo.android_mooc_graphics_3d.robot.AcceptingDrawView
+import com.bennyplo.android_mooc_graphics_3d.robot.twoConnectedeCubes
 import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
-    private var drawView: DrawView? = null //a custom view for drawing
-    private var drawView2 : TestingHalfLinksView? = null
+    val key = 20
+    val key2 = 25
+    val obj = twoConnectedeCubes()
+    val obj2 = obj.halfLink(key).getOtherParent()!!
+    val obj3 = obj2.halfLink(key2).getOtherParent()!!
+    val link1 = obj.halfLink(key)
+    val link2 = obj2.halfLink(key2)
+    var view : AcceptingDrawView? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        view = AcceptingDrawView(this)
+        view!!.setWillNotDraw(false)
+        view!!.sourceSet.add(obj)
+        /*link1.rotateOtherAroundAxisModel(key, 90.0)
+        link2.rotateOtherAroundAxisModel(key2, 40.0)*/
+        setContentView(view)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        CoroutineScope(Dispatchers.Default).launch {
+            val relative1 = 0.4
+            val relative2 = 1.0
+            var global = 30.0
+            val ascendGlobal = 0.4
+            while (isActive) {
+                link1.rotateOtherAroundAxisModel(key, relative1)
+                link2.rotateOtherAroundAxisModel(key2, relative2)
+                view!!.globalSetup = {
+                    Log.i("rotation", "Executing global rotation")
+                    obj.rotateAxisGlobal(global, Coordinate(1.0, 0.0, 0.0, 1.0), TransformationInfo.empty())
+                }
+                global += ascendGlobal; if (global >= 360) global = 0.0
+                view!!.invalidate()
+                delay(16)
+            }
+        }
+    }
+/*
+    val key = 20
+    val keySecond = 25
+    val obj = twoConnectedeCubes()
+    val rotatingHalfLink1_2 = obj.halfLink(key)
+    val rotatingHalfLink2_3 = run {
+        val thing = obj.halfLink(key).run {
+            getOtherParent()!!.halfLink(keySecond)
+        }
+        thing
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_main);
         supportActionBar!!.hide() //hide the title bar
-//        drawView = DrawView(this)
-        drawView2 = TestingHalfLinksView(this)
-        var angleX: Double = 90.0
-        var angleY: Double = 25.0
-        var angleZ: Double = 0.0
-        var angle: Double = 25.0
+        acceptingDrawView = AcceptingDrawView(this)
 
-        drawView2!!.setup = {
-            println("In loop, angleX: $angleX")
-            println("In loop, angleY: $angleY")
-            println("In loop, angleZ: $angleZ")
+        acceptingDrawView.sourceSet.add(obj)
 
-            rotateAxis(angle,axis(1,0,0))
-            translate(200.0, 0.0, 100.0)
-//            rotateAxis(angle, axis(0, 0, 1))
-            placeInCenter()
-
-            angle += 1.0
-            if (angleX >= 360) angleX = 0.0;
-            if (angleY >= 360) angleY = 0.0;
-            if (angleZ >= 360) angleZ = 0.0;
-            if (angle >= 360) angle = 0.0;
-        }
-        setContentView(drawView2)
+        setContentView(acceptingDrawView)
     }
 
     override fun onStart() {
         super.onStart()
         launch {
+            val relative1_2 = 0.4
+            val relative2_3 = 1.0
+            var global = 30.0
+            val ascendGlobal = 0.4
             while (isActive) {
-                drawView2!!.invalidate()
-                delay(10)
+                //rotatingHalfLink1_2.rotateOtherAroundAxisModel(key, relative1_2)
+                rotatingHalfLink2_3.rotateOtherAroundAxisModel(keySecond, relative2_3)
+                acceptingDrawView.globalSetup = {
+                    Log.i("rotation", "Executing global rotation")
+                    obj.rotateAxisGlobal(global, Coordinate(1.0, 0.0, 0.0, 1.0), TransformationInfo.empty())
+                }
+                global += ascendGlobal; if (global >= 360) global = 0.0
+                delay(16)
+                acceptingDrawView.invalidate()
             }
         }
-    }
+    }*/
 }
+
+
+// TODO сделать анализ очереди отрисовки по z
+// TODO сделать вращение в джоинтах - чтобы это сделать адекватно, необходимо задать в локальных координатах джоинта доступные для
+//  вращения оси, то есть настроить заранее массив доступных для вращения осей, и так же по какому-то ключу можно было бы их получать

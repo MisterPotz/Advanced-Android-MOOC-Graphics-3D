@@ -4,34 +4,30 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 
-interface Transformatable {
-    fun shear(hx: Double, hy: Double)
+interface TransformatableGlobal {
+    fun shearGlobal(hx: Double, hy: Double)
 
-    fun rotateX(xTheta: Double)
+    fun rotateAxisGlobal(theta: Double, axis: Coordinate)
 
-    fun rotateY(yTheta: Double)
+    fun scaleGlobal(times: Double)
 
-    fun rotateZ(zTheta: Double)
+    fun translateGlobal(dx: Double, dy: Double, dz: Double)
 
-    fun rotateAxis(theta: Double, axis: Coordinate)
-
-    fun scale(times: Double)
-
-    fun translate(dx: Double, dy: Double, dz: Double)
-
-    fun restore()
+    fun localToGlobal()
 }
 
-abstract class DrawableObject(val vertices: Array<Coordinate?>) : Transformatable {
+abstract class DrawableObject(val local: Array<Coordinate?>, setupPaint: Paint.() -> Unit = {
+    style = Paint.Style.STROKE //Stroke
+    color = Color.RED
+    strokeWidth = 3f
+}) : TransformatableGlobal {
     abstract fun drawOnCanvas(canvas: Canvas)
 
-    var verticesToDraw: Array<Coordinate?> = vertices.copyOf()
-
     open val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE //Stroke
-        color = Color.RED
-        strokeWidth = 3f
+        setupPaint()
     }
+
+    var global: Array<Coordinate?> = local.copyOf()
 
     fun drawLinePairs(canvas: Canvas, vertices: Array<Coordinate?>, start: Int, end: Int, paint: Paint) { //draw a line connecting 2 points
 //canvas - canvas of the view
@@ -42,36 +38,24 @@ abstract class DrawableObject(val vertices: Array<Coordinate?>) : Transformatabl
         canvas.drawLine(vertices[start]!!.x.toFloat(), vertices[start]!!.y.toFloat(), vertices[end]!!.x.toFloat(), vertices[end]!!.y.toFloat(), paint)
     }
 
-    override fun shear(hx: Double, hy: Double) {
-        verticesToDraw = shear(verticesToDraw, hx, hy)
+    override fun shearGlobal(hx: Double, hy: Double) {
+        global = shear(global, hx, hy)
     }
 
-    override fun rotateX(xTheta: Double) {
-        verticesToDraw = rotateX(verticesToDraw, xTheta)
+    override fun localToGlobal() {
+        global = local.copyOf()
     }
 
-    override fun rotateY(yTheta: Double) {
-        verticesToDraw = rotateY(verticesToDraw, yTheta)
+    override fun rotateAxisGlobal(theta: Double, axis: Coordinate) {
+        global = rotateAxis(global, theta, axis)
     }
 
-    override fun rotateZ(zTheta: Double) {
-        verticesToDraw = rotateZ(verticesToDraw, zTheta)
+    override fun scaleGlobal(times: Double) {
+        global = scale(global, times, times, times)
     }
 
-    override fun restore() {
-        verticesToDraw = vertices.copyOf()
-    }
-
-    override fun rotateAxis(theta: Double, axis: Coordinate) {
-        verticesToDraw = rotateAxis(verticesToDraw, theta, axis)
-    }
-
-    override fun scale(times: Double) {
-        verticesToDraw = scale(verticesToDraw, times, times, times)
-    }
-
-    override fun translate(dx: Double, dy: Double, dz: Double) {
-        verticesToDraw = translate(verticesToDraw, dx, dy, dz)
+    override fun translateGlobal(dx: Double, dy: Double, dz: Double) {
+        global = translate(global, dx, dy, dz)
 
     }
 }

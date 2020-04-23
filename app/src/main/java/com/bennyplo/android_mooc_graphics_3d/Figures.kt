@@ -25,7 +25,7 @@ fun cube(): DrawableObject {
 
     return object : DrawableObject(cube_vertices) {
         override fun drawOnCanvas(canvas: Canvas) {
-            verticesToDraw.apply {
+            global.apply {
                 drawLinePairs(canvas, this, 5, 7, paint)
                 drawLinePairs(canvas, this, 0, 1, paint)
                 drawLinePairs(canvas, this, 1, 3, paint)
@@ -50,10 +50,10 @@ fun circle(): DrawableObject {
 
     return object : DrawableObject(circleVertices) {
         override fun drawOnCanvas(canvas: Canvas) {
-            for (i in 0 until verticesToDraw.size - 1) {
-                drawLinePairs(canvas, verticesToDraw, i, i + 1, paint)
+            for (i in 0 until global.size - 1) {
+                drawLinePairs(canvas, global, i, i + 1, paint)
             }
-            drawLinePairs(canvas, vertices, 0, verticesToDraw.lastIndex, paint)
+            drawLinePairs(canvas, global, 0, global.lastIndex, paint)
         }
     }
 }
@@ -80,7 +80,7 @@ fun entrance(): DrawableObject {
 
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         override fun drawOnCanvas(canvas: Canvas) {
-            verticesToDraw.apply {
+            global.apply {
                 drawLinePairs(canvas, this, 0, 1, paint)
                 drawLinePairs(canvas, this, 1, 2, paint)
                 drawLinePairs(canvas, this, 2, 3, paint)

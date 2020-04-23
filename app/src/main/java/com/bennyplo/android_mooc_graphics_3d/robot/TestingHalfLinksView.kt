@@ -6,7 +6,7 @@ import android.view.View
 import com.bennyplo.android_mooc_graphics_3d.*
 
 class TestingHalfLinksView(context: Context?) : View(context, null) {
-    private val sourceSet: List<DrawableObject> = listOf(twoConnectedeCubes())
+    private val sourceSet: List<ConnectableObject> = listOf(twoConnectedeCubes())
 
     var setup: (TestingHalfLinksView.() -> Unit)? = null
 
@@ -17,17 +17,19 @@ class TestingHalfLinksView(context: Context?) : View(context, null) {
 
     override fun onDraw(canvas: Canvas) { //draw objects on the screen
         resetAll()
-        scale(100.0)
 
         setup?.invoke(this)
+
+        placeInCenter()
 
         drawAll(canvas)
         super.onDraw(canvas)
     }
 
+    // Reset to model level
     fun resetAll() {
         sourceSet.forEach {
-            it.restore()
+            it.modelToGlobal(TransformationInfo.empty())
         }
     }
 
@@ -39,37 +41,43 @@ class TestingHalfLinksView(context: Context?) : View(context, null) {
 
     fun shear(hx: Double, hy: Double) {
         sourceSet.forEach {
-            it.shear(hx, hy)
+            it.shearGlobal(hx, hy)
         }
     }
 
-    fun rotateX(xTheta: Double) {
+//    fun rotateX(xTheta: Double) {
+//        sourceSet.forEach {
+//            it.rotateX(xTheta)
+//        }
+//    }
+//
+//    fun rotateY(yTheta: Double) {
+//        sourceSet.forEach {
+//            it.rotateY(yTheta)
+//        }
+//    }
+//
+//    fun rotateZ(zTheta: Double) {
+//        sourceSet.forEach {
+//            it.rotateZ(zTheta)
+//        }
+//    }
+
+    fun rotateAxisGlobal(theta: Double, axis: Coordinate) {
         sourceSet.forEach {
-            it.rotateX(xTheta)
+            it.rotateAxisGlobal(theta, axis)
         }
     }
 
-    fun rotateY(yTheta: Double) {
+    fun rotateAxisModel(theta: Double, axis: Coordinate) {
         sourceSet.forEach {
-            it.rotateY(yTheta)
-        }
-    }
-
-    fun rotateZ(zTheta: Double) {
-        sourceSet.forEach {
-            it.rotateZ(zTheta)
-        }
-    }
-
-    fun rotateAxis(theta: Double, axis: Coordinate) {
-        sourceSet.forEach {
-            it.rotateAxis(theta, axis)
+            it.rotateAxisModel(theta, axis, TransformationInfo.empty())
         }
     }
 
     fun scale(times: Double) {
         sourceSet.forEach {
-            it.scale(times)
+            it.scaleGlobal(times)
         }
     }
 
@@ -79,7 +87,7 @@ class TestingHalfLinksView(context: Context?) : View(context, null) {
         val ycenter = height / 2.0
         val xcenter = width / 2.0
         // draw_cube_vertices = scale(draw_cube_vertices, 100.0, 100.0, 100.0)
-        translate(xcenter, ycenter, 2.0)
+        translateGlobal(xcenter, ycenter, 2.0)
     }
 
     fun placeInCenter() {
@@ -90,7 +98,7 @@ class TestingHalfLinksView(context: Context?) : View(context, null) {
 
     fun translate(dx: Double, dy: Double, dz: Double) {
         sourceSet.forEach {
-            it.translate(dx, dy, dz)
+            it.translateGlobal(dx, dy, dz)
         }
     }
 }

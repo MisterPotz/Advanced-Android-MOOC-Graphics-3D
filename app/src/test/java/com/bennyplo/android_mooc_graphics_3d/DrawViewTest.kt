@@ -1,7 +1,8 @@
 package com.bennyplo.android_mooc_graphics_3d
 
-import org.junit.Assert.*
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+
 
 class DrawViewTest {
     @Test

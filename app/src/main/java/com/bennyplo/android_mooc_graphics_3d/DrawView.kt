@@ -2,8 +2,6 @@ package com.bennyplo.android_mooc_graphics_3d
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.view.View
 
 class DrawView(context: Context?) : View(context, null) {
@@ -35,43 +33,25 @@ class DrawView(context: Context?) : View(context, null) {
 
     fun shear(hx: Double, hy: Double) {
         sourceSet.forEach {
-            it.shear(hx, hy)
-        }
-    }
-
-    fun rotateX(xTheta: Double) {
-        sourceSet.forEach {
-            it.rotateX(xTheta)
-        }
-    }
-
-    fun rotateY(yTheta: Double) {
-        sourceSet.forEach {
-            it.rotateY(yTheta)
-        }
-    }
-
-    fun rotateZ(zTheta: Double) {
-        sourceSet.forEach {
-            it.rotateZ(zTheta)
+            it.shearGlobal(hx, hy)
         }
     }
 
     fun resetAll() {
         sourceSet.forEach {
-            it.restore()
+            it.localToGlobal()
         }
     }
 
     fun rotateAxis(theta: Double, axis: Coordinate) {
         sourceSet.forEach {
-            it.rotateAxis(theta, axis)
+            it.rotateAxisGlobal(theta, axis)
         }
     }
 
     fun scale(times: Double) {
         sourceSet.forEach {
-            it.scale(times)
+            it.scaleGlobal(times)
         }
     }
 
@@ -92,7 +72,7 @@ class DrawView(context: Context?) : View(context, null) {
 
     fun translate(dx: Double, dy: Double, dz: Double) {
         sourceSet.forEach {
-            it.translate(dx, dy, dz)
+            it.translateGlobal(dx, dy, dz)
         }
     }
 

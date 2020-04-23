@@ -17,10 +17,10 @@ fun launchCoriolis(drawView: DrawView, activity: Activity) {
             println("In loop, angleZ: $angleZ")
 
             activity.runOnUiThread {
-                drawView!!.setup = {
-                    rotateX(angleX)
-                    rotateY(angleY)
-                    rotateZ(angleZ)
+                drawView.setup = {
+//                    rotateX(angleX)
+//                    rotateY(angleY)
+//                    rotateZ(angleZ)
                 }
             }
             angleX += 0.2
