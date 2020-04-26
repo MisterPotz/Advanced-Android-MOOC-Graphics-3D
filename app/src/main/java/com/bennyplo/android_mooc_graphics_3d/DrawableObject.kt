@@ -9,7 +9,7 @@ interface TransformatableGlobal {
 
     fun rotateAxisGlobal(theta: Double, axis: Coordinate)
 
-    fun scaleGlobal(times: Double)
+    fun scaleGlobal(times: Double, dy : Double, dz: Double)
 
     fun translateGlobal(dx: Double, dy: Double, dz: Double)
 
@@ -53,8 +53,8 @@ abstract class DrawableObject(val local: Array<Coordinate?>, setupPaint: Paint.(
         global = rotateAxis(global, theta, axis)
     }
 
-    override fun scaleGlobal(times: Double) {
-        global = scale(global, times, times, times)
+    override fun scaleGlobal(times: Double, dy : Double, dz : Double) {
+        global = scale(global, times, dy, dz)
     }
 
     override fun translateGlobal(dx: Double, dy: Double, dz: Double) {

@@ -77,7 +77,7 @@ class TestingHalfLinksView(context: Context?) : View(context, null) {
 
     fun scale(times: Double) {
         sourceSet.forEach {
-            it.scaleGlobal(times)
+            it.scaleGlobal(times, times,times)
         }
     }
 

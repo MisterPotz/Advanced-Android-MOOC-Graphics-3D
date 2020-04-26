@@ -10,7 +10,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
 class AcceptingDrawView(context: Context) : View(context) {
-    val sourceSet = mutableListOf<ConnectableObject>(twoConnectedeCubes())
+    val robot = Robot()
+    val sourceSet = mutableListOf<ConnectableObject>(robot.getMain()/*twoConnectedeCubes()*/)
 
     var globalSetup: (() -> Unit)? = null
 
@@ -19,33 +20,36 @@ class AcceptingDrawView(context: Context) : View(context) {
     var global = 30.0
     val ascendGlobal = 0.4
 
-    val key = 20
-    val key2 = 25
-    val obj = sourceSet[0]
-    val obj2 = obj.halfLink(key).getOtherParent()!!
-    val obj3 = obj2.halfLink(key2).getOtherParent()!!
-    val link1 = obj.halfLink(key)
-    val link2 = obj2.halfLink(key2)
-    var view: AcceptingDrawView? = null
+//    val key = 20
+//    val key2 = 25
+//    val obj = sourceSet[0]
+//    val obj2 = obj.halfLink(key).getOtherParent()!!
+//    val obj3 = obj2.halfLink(key2).getOtherParent()!!
+//    val link1 = obj.halfLink(key)
+//    val link2 = obj2.halfLink(key2)
+//    var view: AcceptingDrawView? = null
 
     init {
-        obj.scaleModel(0.1, 0.1, 0.1, TransformationInfo.empty())
+        //obj.scaleModel(0.1, 0.1, 0.1, TransformationInfo.empty())
     }
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
-        link1.rotateOtherAroundAxisModel(key, relative1)
-        link2.rotateOtherAroundAxisModel(key2, relative2)
+//        link1.rotateOtherAroundAxisModel(key, relative1)
+//        link2.rotateOtherAroundAxisModel(key2, relative2)
 
         resetAll()
+        robot.getMain().scaleGlobal(100.0, 100.0, 100.0)
 
-        obj.rotateAxisGlobal(global, Coordinate(1.0, 0.0, 0.0, 1.0), TransformationInfo.empty())
-        obj.translateGlobal(0.0,0.0, -1.6)
-
-        global += ascendGlobal; if (global >= 360) global = 0.0
-
-        obj.projectToGlobal(ProjectionBesicParameters(1.0, -1.0, -1.0, 1.0, 1.0, 2.0), TransformationInfo.empty())
-        obj.scaleGlobal(1000.0)
+//        obj.rotateAxisGlobal(global, Coordinate(1.0, 0.0, 0.0, 1.0), TransformationInfo.empty())
+//        obj.translateGlobal(0.0,0.0, -1.6)
+//
+//        global += ascendGlobal; if (global >= 360) global = 0.0
+//
+//        obj.projectToGlobal(ProjectionBesicParameters(1.0, -1.0, -1.0, 1.0, 1.0, 2.0), TransformationInfo.empty())
+//        obj.scaleGlobal(1000.0)
+        robot.getMain().rotateAxisGlobal(30.0, Coordinate(1.0,1.0,0.0,1.0))
+        robot.getMain().scaleGlobal(1.0,-1.0,1.0)
         placeInCenter()
         drawAll(canvas)
         super.onDraw(canvas)
@@ -65,6 +69,12 @@ class AcceptingDrawView(context: Context) : View(context) {
         val xcenter = width / 2.0
         // draw_cube_vertices = scale(draw_cube_vertices, 100.0, 100.0, 100.0)
         translateGlobal(xcenter, ycenter, 2.0)
+    }
+
+    fun inverseY() {
+        sourceSet.forEach {
+            it.scaleGlobal(1.0, -1.0, 1.0)
+        }
     }
 
     fun placeInCenter() {

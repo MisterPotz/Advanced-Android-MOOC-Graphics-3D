@@ -153,13 +153,13 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
     /**
      * Scales all objects that are somehow connected
      */
-    override fun scaleGlobal(times: Double) {
+    override fun scaleGlobal(times: Double, dy: Double, dz : Double) {
         // that is wrong - can't change model from global
-        scaleGlobal(times, createEmptyTransformation())
+        scaleGlobal(times, dy, dz, createEmptyTransformation())
     }
 
-    internal fun scaleGlobal(times: Double, record: TransformationInfo) {
-        scaleGlobal.perform(record, getAllOthers(), CoordinatesScope(times, times, times))
+    internal fun scaleGlobal(times: Double, dy: Double, dz: Double, record: TransformationInfo) {
+        scaleGlobal.perform(record, getAllOthers(), CoordinatesScope(times, dy, dz))
     }
 
     fun addHalfLink(key: Int, coordinate: Coordinate) {

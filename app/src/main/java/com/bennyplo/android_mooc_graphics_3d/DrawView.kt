@@ -21,7 +21,7 @@ class DrawView(context: Context?) : View(context, null) {
         translate(0.0,0.0, -2.0)
         project(1.0,-1.0,-1.0, 1.0, 1.0, 1.1)
 
-        scale(100.0)
+        scale(100.0, 100.0, 100.0)
 //        rotateAxis(30.0, Coordinate(1.0,1.0,0.0,0.0))
 
         placeInCenter()
@@ -55,9 +55,9 @@ class DrawView(context: Context?) : View(context, null) {
         }
     }
 
-    fun scale(times: Double) {
+    fun scale(times: Double, dy : Double, dz: Double) {
         sourceSet.forEach {
-            it.scaleGlobal(times)
+            it.scaleGlobal(times, dy,dz)
         }
     }
 

@@ -19,7 +19,7 @@ class RecursionScaleGlobal(connectableObject: ConnectableObject) :
         }, { obj, scope, record ->
             obj.apply {
                 scope.apply {
-                    scaleGlobal(dx, record)
+                    scaleGlobal(dx, dy, dz, record)
                 }
             }
         })
