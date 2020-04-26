@@ -5,7 +5,7 @@ import android.graphics.Canvas
 import android.view.View
 
 class DrawView(context: Context?) : View(context, null) {
-    private val sourceSet: List<DrawableObject> = listOf(cube(), entrance(), circle())
+    private val sourceSet: List<DrawableObject> = listOf(cube())
 
     var setup: (DrawView.() -> Unit)? = null
 
@@ -16,9 +16,15 @@ class DrawView(context: Context?) : View(context, null) {
 
     override fun onDraw(canvas: Canvas) { //draw objects on the screen
         resetAll()
-        scale(100.0)
+        // translating lower so object will be captured in frustum
+        rotateAxis(65.0, Coordinate(1.0,0.0,0.0,1.0))
+        translate(0.0,0.0, -2.0)
+        project(1.0,-1.0,-1.0, 1.0, 1.0, 1.1)
 
-        setup?.invoke(this)
+        scale(100.0)
+//        rotateAxis(30.0, Coordinate(1.0,1.0,0.0,0.0))
+
+        placeInCenter()
 
         drawAll(canvas)
         super.onDraw(canvas)
@@ -52,6 +58,18 @@ class DrawView(context: Context?) : View(context, null) {
     fun scale(times: Double) {
         sourceSet.forEach {
             it.scaleGlobal(times)
+        }
+    }
+
+    fun project(left: Double, right: Double, top: Double, bottom: Double, near: Double, far: Double) {
+        sourceSet.forEach {
+            it.projectGlobal(left, right, top, bottom, near, far)
+        }
+    }
+
+    fun project(near: Double, far: Double, fov: Double) {
+        sourceSet.forEach {
+            it.projectGlobal(near, far, fov)
         }
     }
 

@@ -13,6 +13,9 @@ interface TransformatableGlobal {
 
     fun translateGlobal(dx: Double, dy: Double, dz: Double)
 
+    fun projectGlobal(left: Double, right: Double, top: Double, bottom: Double, near: Double, far: Double)
+
+    fun projectGlobal(near: Double, far : Double, fov : Double)
     fun localToGlobal()
 }
 
@@ -56,6 +59,13 @@ abstract class DrawableObject(val local: Array<Coordinate?>, setupPaint: Paint.(
 
     override fun translateGlobal(dx: Double, dy: Double, dz: Double) {
         global = translate(global, dx, dy, dz)
+    }
 
+    override fun projectGlobal(left: Double, right: Double, top: Double, bottom: Double, near: Double, far: Double) {
+        global = project(global, left, right, top, bottom, near, far)
+    }
+
+    override fun projectGlobal(near: Double, far: Double, fov: Double) {
+        global = project(global, near, far, fov)
     }
 }

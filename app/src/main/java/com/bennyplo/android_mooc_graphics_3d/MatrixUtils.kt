@@ -4,6 +4,7 @@ import java.util.*
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
+import kotlin.math.tan
 
 fun transformation(vertex: Coordinate?, matrix: Array<DoubleArray>): Coordinate { //affine transformation with homogeneous coordinates
 //i.e. a vector (vertex) multiply with the transformation matrix
@@ -23,7 +24,7 @@ fun transformation(vertices: Array<Coordinate?>, matrix: Array<DoubleArray>): Ar
     val result = arrayOfNulls<Coordinate>(vertices.size)
     for (i in vertices.indices) {
         result[i] = transformation(vertices[i], matrix)
-        //result[i]!!.Normalise()
+        result[i]!!.Normalise()
     }
     return result
 }
@@ -125,6 +126,48 @@ fun rotateAxis(vertices: Array<Coordinate?>, theta: Double, vectorInitial: Coord
         setAt(8, vector.run { 2 * x * z - 2 * w * y })
         setAt(9, vector.run { 2 * y * z + 2 * w * x })
         setAt(10, vector.run { w.pow(2) - x.pow(2) - y.pow(2) + z.pow(2) })
+    }
+    return transformation(vertices, identityMatrix)
+}
+
+/**
+ * [angle] in degrees
+ */
+fun project(vertices: Array<Coordinate?>,
+            left: Double, right: Double, top: Double, bottom: Double, near: Double, far: Double): Array<Coordinate?> {
+    val identityMatrix = DrawView.getIdentityMatrix()
+//    val ar = (right - left) / (top - bottom)
+//    val tana = tan(Math.toRadians(angle) / 2)
+    identityMatrix.apply {
+        // setting last element to be null
+        setAt(15, 0.0)
+
+        setAt(0, 2 * near / (right- left))
+        setAt(2, (right + left) / (right - left))
+        setAt(5, 2 * near / (top - bottom))
+        setAt(6, (top + bottom) / (top - bottom))
+        setAt(10, - (far + near) / (far - near))
+        setAt(11, - 2 * (far * near) / (far - near))
+        setAt(14, -1.0)
+        setAt(15, 0.0)
+    }
+    return transformation(vertices, identityMatrix)
+}
+
+/**
+ * [angle] in degrees
+ */
+fun project(vertices: Array<Coordinate?>, near: Double, far: Double, fov: Double): Array<Coordinate?> {
+    val identityMatrix = DrawView.getIdentityMatrix()
+//    val ar = (right - left) / (top - bottom)
+    val tana = tan(Math.toRadians(fov) / 2)
+    identityMatrix.apply {
+        setAt(0, 1.0 / tana)
+        setAt(2, 1.0/ tana)
+        setAt(10,  - far / (far - near))
+        setAt(11, -1.0)
+        setAt(14, -far *near/ (far - near))
+        setAt(15, 0.0)
     }
     return transformation(vertices, identityMatrix)
 }

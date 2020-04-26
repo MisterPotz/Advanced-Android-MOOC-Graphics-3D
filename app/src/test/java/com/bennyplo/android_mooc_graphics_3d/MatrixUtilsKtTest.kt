@@ -1,6 +1,7 @@
 package com.bennyplo.android_mooc_graphics_3d
 
 
+import android.graphics.Canvas
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -32,5 +33,56 @@ class MatrixUtilsKtTest {
             return abs(this - target) <= 0.001
         }
         return abs(this / target).run { this in 0.99..1.01 }
+    }
+
+    @Test
+    fun project() {
+        val coordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -1.0, 1.0))
+        val newCoordinate = project(coordinate, -1.0, 1.0, 1.0, -1.0, 1.0, 10.0)
+//        newCoordinate[0]!!.Normalise()
+        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,-1.0,1.0)), newCoordinate)
+
+        val endCoordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
+        val newEndCoordinate = project(endCoordinate, -1.0, 1.0, 1.0, -1.0, 1.0, 10.0)
+        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,1.0,1.0)), newEndCoordinate)
+
+    }
+
+    @Test
+    fun projectReverse() {
+        val coordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, 1.0, 1.0))
+        val newCoordinate = project(coordinate, -1.0, 1.0, 1.0, -1.0, -1.0, 10.0)
+
+//        newCoordinate[0]!!.Normalise()
+        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,-1.0,1.0)), newCoordinate)
+
+        val endCoordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
+        val newEndCoordinate = project(endCoordinate, -1.0, 1.0, 1.0, -1.0, -1.0, 10.0)
+        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,1.0,1.0)), newEndCoordinate)
+    }
+
+    @Test
+    fun projectScaled() {
+        val coordinate : Array<Coordinate?> = arrayOf(Coordinate(100.0, 100.0, -100.0, 1.0))
+        val newCoordinate = project(coordinate, 100.0, -100.0, -100.0, 100.0, -100.0, 100.0)
+//        newCoordinate[0]!!.Normalise()
+        assertArrayEquals(arrayOf(Coordinate(1.0, 1.0,1.0,1.0)), newCoordinate)
+
+//        val endCoordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
+//        val newEndCoordinate = project(endCoordinate, -1.0, 1.0, 1.0, -1.0, 1.0, 10.0)
+//        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,1.0,1.0)), newEndCoordinate)
+    }
+
+
+    @Test
+    fun scaleTo100AndProject() {
+        val coordinate : Array<Coordinate?> = arrayOf(Coordinate(1.0, 1.0, -100.0, 1.0))
+        val newCoordinate = project(coordinate, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0)
+//        newCoordinate[0]!!.Normalise()
+        assertArrayEquals(arrayOf(Coordinate(0.01, 0.01,0.01,1.0)), newCoordinate)
+
+//        val endCoordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
+//        val newEndCoordinate = project(endCoordinate, -1.0, 1.0, 1.0, -1.0, 1.0, 10.0)
+//        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,1.0,1.0)), newEndCoordinate)
     }
 }

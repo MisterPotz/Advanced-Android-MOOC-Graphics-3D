@@ -5,12 +5,12 @@ fun Array<DoubleArray>.getAt(place: Int): Double {
     return this[place / size][place % this[0].size]
 }
 
-fun Array<DoubleArray>.setAt(place: Int, value: Double): Array<DoubleArray> {
+inline fun Array<DoubleArray>.setAt(place: Int, value: Double): Array<DoubleArray> {
     this[place / size][place % this[0].size] = value
     return this
 }
 
-fun Array<DoubleArray>.multiplyAt(place: Int, value: Double): Array<DoubleArray> {
+inline fun Array<DoubleArray>.multiplyAt(place: Int, value: Double): Array<DoubleArray> {
     setAt(place, if (getAt(place) == 0.0) {
         value
     } else {

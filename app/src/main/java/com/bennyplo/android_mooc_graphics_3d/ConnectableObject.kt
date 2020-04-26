@@ -4,7 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
-import java.lang.IllegalStateException
+import com.bennyplo.android_mooc_graphics_3d.scopes.*
 
 /**
  * [isBlocking] - represents if recursion shoud stop if object with this tag should end
@@ -18,6 +18,8 @@ data class TransformationInfo(val objs: MutableMap<ConnectableObject, PerObjectT
         fun empty() = TransformationInfo(mutableMapOf())
     }
 }
+
+data class ProjectionBesicParameters(val left: Double, val right: Double, val top: Double, val bottom: Double, val near: Double, val far: Double)
 
 /**
  * Interface for transformations on complex interconnected objects.
@@ -36,6 +38,11 @@ interface TransformableModel {
     fun localToModel(record: TransformationInfo)
 
     fun modelToGlobal(record: TransformationInfo)
+
+    /**
+     * Projection can be applied only on global level
+     */
+    fun projectToGlobal(params: ProjectionBesicParameters, record: TransformationInfo)
 }
 
 abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.() -> Unit = {
@@ -52,6 +59,17 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
     // this link is drawn in the first place - but that behavior must be customizable in the future, also it can be calculated with z
     // here must draw also children that are connected to this node via links}
 
+    private val drawDelegate = RecursionCanvas(this)
+    private val mtGDelegate = RecursionMtG(this)
+    private val translateGlobalDelegate = RecursionTranslationGlobal(this)
+    private val translateModelDelegate = RecursionTranslationModel(this)
+    private val scaleModel = RecursionScaleModel(this)
+    private val rotationAxisModel = RecursionRotateAxisModel(this)
+    private val rotateAxisGlobal = RecursionRotateAxisGlobal(this)
+    private val localToModel = RecursionLocalToModel(this)
+    private val scaleGlobal = RecursionScaleGlobal(this)
+    private val projectGlobal = RecursionProjectionGlobal(this)
+
     final override fun drawOnCanvas(canvas: Canvas) {
         fullDraw(canvas, createEmptyTransformation())
     }
@@ -60,6 +78,8 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
 
     abstract fun rawDraw(canvas: Canvas)
 
+    private fun getAllOthers() = links.map { it.value.getOtherParent() }
+
     /**
      * [parent] - is the object that initialized drawing, we must know a pointer to him
      * to not cause recursion.
@@ -67,24 +87,21 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
      * fullDraw - must be
      * if [alreadyDrawn] equals null - then its the first
      */
-    protected fun fullDraw(canvas: Canvas, record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-        performSafely(record) { rawDraw(canvas) }
-        performOnOthers { it.fullDraw(canvas, record) }
+    internal fun fullDraw(canvas: Canvas, record: TransformationInfo) {
+        drawDelegate.perform(record, getAllOthers(), ScopeCanvas(canvas))
     }
 
     override fun modelToGlobal(record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-        val exceptNew = performSafely(record) { global = model.copyOf() }
-        performOnOthers { modelToGlobal(exceptNew) }
+        mtGDelegate.perform(record, getAllOthers(), ScopeMtG())
+    }
+
+    override fun projectToGlobal(params: ProjectionBesicParameters, record: TransformationInfo) {
+        projectGlobal.perform(record, getAllOthers(), PrjectionScope(params))
     }
 
     override fun localToGlobal() {
         super.localToGlobal()
+        // TODO распространять по всем нодам
         Log.w("suspicious operation", "localToGlobal recommended only for" +
                 "usual DrawableObject")
     }
@@ -95,16 +112,7 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
     }
 
     internal fun translateGlobal(dx: Double, dy: Double, dz: Double, record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-        val exceptNew = performSafely(record) {
-            global = translate(global, dx, dy, dz)
-            for (i in links) {
-                i.value.translateGlobal(dx, dy, dz)
-            }
-        }
-        performOnOthers { it.translateGlobal(dx, dy, dz, exceptNew) }
+        translateGlobalDelegate.perform(record, getAllOthers(), CoordinatesScope(dx, dy, dz))
     }
 
     /**
@@ -112,38 +120,14 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
      *     to rotate and translate all model as a whole - use global (default methods)
      */
     override fun translateModel(dx: Double, dy: Double, dz: Double, record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-        val exceptNew = performSafely(record) {
-            model = translate(model, dx, dy, dz)
-            global = model.copyOf()
-            for (i in links) {
-                i.value.translateModel(dx, dy, dz)
-            }
-        }
-        // TODO он делает на всех оставшихся родичах, независимо от того, была ли на нем эта операция уже делана или нет
-        performOnOthers { it.translateModel(dx, dy, dz, exceptNew) }
+        translateModelDelegate.perform(record, getAllOthers(), CoordinatesScope(dx, dy, dz))
     }
 
     /**
      * Scales model
      */
     override fun scaleModel(sx: Double, sy: Double, sz: Double, record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-        // Also joint coordinates must be scaled accordingly - and other links repositioned with that scale
-        val exceptNew = performSafely(record) {
-            // scale the vertices
-            model = scale(model, sx, sy, sz)
-            global = model.copyOf()
-            // scale joints coordinate positions
-            for (i in links) {
-                i.value.scaleModel(sx, sy, sz)
-            }
-        }
-        performOnOthers { it.scaleModel(sx, sy, sz, exceptNew) }
+        scaleModel.perform(record, getAllOthers(), CoordinatesScope(sx, sy, sz))
     }
 
     override fun shearModel(hx: Double, hy: Double, record: TransformationInfo) {
@@ -151,21 +135,7 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
     }
 
     override fun rotateAxisModel(theta: Double, axis: Coordinate, record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-
-        val exceptNew = performSafely(record) {
-            // rotate
-            model = rotateAxis(model, theta, axis)
-            global = model.copyOf()
-            // scale joints coordinate positions
-            for (i in links) {
-                i.value.rotateAxisModel(theta, axis)
-            }
-        }
-
-        performOnOthers { it.rotateAxisModel(theta, axis, exceptNew) }
+        rotationAxisModel.perform(record, getAllOthers(), RotationScope(theta, axis))
     }
 
     override fun rotateAxisGlobal(theta: Double, axis: Coordinate) {
@@ -173,32 +143,11 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
     }
 
     internal fun rotateAxisGlobal(theta: Double, axis: Coordinate, record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-
-        val exceptNew = performSafely(record) {
-            // rotate
-            global = rotateAxis(global, theta, axis)
-            // scale joints coordinate positions
-            for (i in links) {
-                i.value.rotateAxisGlobal(theta, axis)
-            }
-        }
-
-        performOnOthers { it.rotateAxisGlobal(theta, axis, exceptNew) }
+        rotateAxisGlobal.perform(record, getAllOthers(), RotationScope(theta, axis))
     }
 
     override fun localToModel(record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-        val exceptNew = performSafely(record) {
-            model = local.copyOf()
-            // scale joints coordinate positions
-
-        }
-        performOnOthers { it.localToModel(exceptNew) }
+        localToModel.perform(record, getAllOthers(), ScopeMtG())
     }
 
     /**
@@ -209,18 +158,8 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
         scaleGlobal(times, createEmptyTransformation())
     }
 
-    private fun scaleGlobal(times: Double, record: TransformationInfo) {
-        if (wasAlreadyPerformed(record)) {
-            return
-        }
-        val exceptNew = performSafely(record) {
-            global = scale(global, times, times, times)
-            // scale joints coordinate positions
-            for (i in links) {
-                i.value.scaleGlobal(times, times, times)
-            }
-        }
-        performOnOthers { it.scaleGlobal(times, exceptNew) }
+    internal fun scaleGlobal(times: Double, record: TransformationInfo) {
+        scaleGlobal.perform(record, getAllOthers(), CoordinatesScope(times, times, times))
     }
 
     fun addHalfLink(key: Int, coordinate: Coordinate) {
@@ -234,56 +173,6 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
 
     fun recordThis(perObjectTransformationInfo: PerObjectTransformationInfo): TransformationInfo {
         return TransformationInfo(mutableMapOf(this to perObjectTransformationInfo))
-    }
-
-    protected fun wasAlreadyPerformed(record: TransformationInfo): Boolean {
-        if (this in record.objs.keys && (!record.objs[this]!!.mustBeExecuted || record.objs[this]!!.isBlocking)) {
-            return true
-        }
-        return false
-    }
-
-    /**
-     * Do an action in block if it haven't been already performed on this object
-     */
-    private inline fun performSafely(
-            record: TransformationInfo,
-            block: ConnectableObject.() -> Unit
-    ): TransformationInfo {
-        if (!wasAlreadyPerformed(record)) {
-            this.block()
-        } else {
-            // if this object was already once drawn - escape drawing recursion
-            throw IllegalStateException("this object was already processed")
-        }
-        return record.apply {
-            reputOnExecution(this)
-        }
-    }
-
-    private fun reputOnExecution(record: TransformationInfo) {
-        if (this in record.objs) {
-            if (record.objs[this]!!.mustBeExecuted) {
-                val info = record.objs[this]!!
-                record.objs.remove(this)
-                record.objs[this] = info.copy(mustBeExecuted = false)
-            } else {
-                throw IllegalStateException("Was already executed - mustBeExecuted = false")
-            }
-        } else {
-            record.objs[this] = PerObjectTransformationInfo(isBlocking = false, mustBeExecuted = false)
-        }
-    }
-
-    /**
-     * Perform block on other connected links
-     */
-    private inline fun performOnOthers(block: (ConnectableObject) -> Unit) {
-        for (i in links) {
-            i.value.getOtherParent()?.let {
-                block(it)
-            }
-        }
     }
 }
 
@@ -335,7 +224,7 @@ class HalfLink(val parent: ConnectableObject, val local: Coordinate) {
     private fun performConnection(halfLink: HalfLink) {
         // All coordinate actions within links must be caused to perform from external sources
         // links can only cause parents do something
-        // model = halfLink.model.copy()
+//        model = halfLink.model.copy()
         updateParentModel(halfLink)
     }
 

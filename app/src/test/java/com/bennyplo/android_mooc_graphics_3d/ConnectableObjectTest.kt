@@ -363,10 +363,10 @@ class ConnectableObjectTest {
                 Coordinate(1.0, -1.0, -1.0, 1.0)
         )
         val global2Expected = arrayOf(
-                Coordinate(-1.0, -1.0, -1.0, 1.0),
+                Coordinate(-1.0, -1.0, 1.0, 1.0),
                 Coordinate(-1.0, -1.0, 3.0, 1.0),
                 Coordinate(1.0, -1.0, 3.0, 1.0),
-                Coordinate(1.0, -1.0, -1.0, 1.0)
+                Coordinate(1.0, -1.0, 1.0, 1.0)
         )
 
         assertArrayEquals(global1Expected1, obj.global)
@@ -418,10 +418,10 @@ class ConnectableObjectTest {
                 Coordinate(11.0, -1.0, -1.0, 1.0)
         )
         val global2Expected = arrayOf(
-                Coordinate(9.0, -1.0, -1.0, 1.0),
+                Coordinate(9.0, -1.0, 1.0, 1.0),
                 Coordinate(9.0, -1.0, 3.0, 1.0),
                 Coordinate(11.0, -1.0, 3.0, 1.0),
-                Coordinate(11.0, -1.0, -1.0, 1.0)
+                Coordinate(11.0, -1.0, 1.0, 1.0)
         )
 
         assertArrayEquals(global1Expected1, obj.global)
@@ -595,7 +595,7 @@ class ConnectableObjectTest {
         obj2.halfLink(key2).connectTo(obj3.halfLink(key2))
 
         obj.halfLink(key).addRotationAxis(key, Coordinate(0.0, 1.0, 0.0, 1.0))
-        obj2.halfLink(key2).addRotationAxis(key2, Coordinate(1.0,0.0,0.0,1.0))
+        obj2.halfLink(key2).addRotationAxis(key2, Coordinate(1.0, 0.0, 0.0, 1.0))
 
         // rotating whole system
         obj.rotateAxisModel(90.0, Coordinate(1.0, 0.0, 0.0, 0.0), TransformationInfo.empty())
@@ -647,12 +647,13 @@ class ConnectableObjectTest {
         obj2.addHalfLink(key2, Coordinate(1.0, 0.0, 1.0, 1.0))
         obj3.addHalfLink(key2, Coordinate(-1.0, 0.0, 1.0, 1.0))
 
-        obj.halfLink(key).connectTo(obj2.halfLink(key))
+        obj.halfLink(key).addRotationAxis(key, Coordinate(0.0, 1.0, 0.0, 1.0))
+        obj2.halfLink(key2).addRotationAxis(key2, Coordinate(1.0, 0.0, 0.0, 1.0))
 
+        obj.halfLink(key).connectTo(obj2.halfLink(key))
         obj2.halfLink(key2).connectTo(obj3.halfLink(key2))
 
-        obj.halfLink(key).addRotationAxis(key, Coordinate(0.0, 1.0, 0.0, 1.0))
-        obj2.halfLink(key2).addRotationAxis(key2, Coordinate(1.0,0.0,0.0,1.0))
+
 
         val currentModel3 = arrayOf(
                 Coordinate(1.0, 1.0, 1.0, 1.0),
@@ -670,7 +671,7 @@ class ConnectableObjectTest {
         assertEquals(initialHalflink2, obj3.halfLink(key2).model)
 
         // rotating whole system
-        obj.rotateAxisModel(90.0, Coordinate(1.0, 0.0, 0.0, 0.0), TransformationInfo.empty())
+        obj.rotateAxisModel(90.0, Coordinate(1.0, 0.0, 0.0, 1.0), TransformationInfo.empty())
 
         val afterRotationModel3 = arrayOf(
                 Coordinate(1.0, -1.0, 1.0, 1.0),
@@ -729,9 +730,9 @@ class ConnectableObjectTest {
 
         val expected3 = arrayOf(
                 Coordinate(-1.0, 0.0, 2.0, 1.0),
-                Coordinate(-1.0, 0.0, 2.0, 1.0),
+                Coordinate(1.0, 0.0, 2.0, 1.0),
                 Coordinate(1.0, 2.0, 2.0, 1.0),
-                Coordinate(1.0, 2.0, 2.0, 1.0)
+                Coordinate(-1.0, 2.0, 2.0, 1.0)
         )
 
         assertArrayEquals(expected1, obj.model)
@@ -739,7 +740,29 @@ class ConnectableObjectTest {
         assertArrayEquals(expected2, obj.halfLink(key).getOtherParent()!!.model)
         assertArrayEquals(expected2, obj2.model)
 
-        assertArrayEquals(expected3, obj2.halfLink(key2).getOtherParent()!!.model)
         assertArrayEquals(expected3, obj3.model)
+        assertArrayEquals(expected3, obj2.halfLink(key2).getOtherParent()!!.model)
+    }
+
+    @Test
+    fun rotationInY() {
+        val obj = square()
+        val obj2 = square()
+        val key = 20
+        obj.addHalfLink(key, Coordinate(0.0, 1.0, 1.0, 1.0))
+        obj2.addHalfLink(key, Coordinate(0.0, -1.0, 1.0, 1.0))
+        obj.halfLink(key).connectTo(obj2.halfLink(key))
+
+        obj.halfLink(key).addRotationAxis(key, Coordinate(0.0, 1.0, 0.0,1.0))
+        obj.halfLink(key).rotateOtherAroundAxisModel(key, 90.0)
+
+        val model2Expected = arrayOf(
+                Coordinate(0.0, 1.0, 2.0, 1.0),
+                Coordinate(0.0, 3.0, 2.0, 1.0),
+                Coordinate(0.0, 3.0, 0.0, 1.0),
+                Coordinate(0.0, 1.0, 0.0, 1.0)
+        )
+
+        assertArrayEquals(model2Expected, obj2.model)
     }
 }

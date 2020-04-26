@@ -27,7 +27,7 @@ public class Coordinate {
     }
 
     public void Normalise() {//to keep it as a homogeneous coordinate -> divide the coordinate with w and set w=1
-        if (w != 0) {//ensure that w!=0
+        if (w != 0 && w != 1) {//ensure that w!=0
             x /= w;
             y /= w;
             z /= w;
@@ -53,7 +53,7 @@ public class Coordinate {
         if (target == 0.0 || expected == 0.0) {
             return abs(expected - target) <= 0.0000001;
         }
-        double relation = abs(target / expected);
+        double relation = (target / expected);
         return relation <= 1.0000001 && relation >= 0.9999999;
     }
 

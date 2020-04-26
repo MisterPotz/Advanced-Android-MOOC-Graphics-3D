@@ -126,8 +126,8 @@ fun littleHead(): ConnectableObject {
  */
 fun twoConnectedeCubes(): ConnectableObject {
     val obj1 = head()
-    val obj2 = pseudoHead()
-    val obj3 = littleHead()
+    val obj2 = head()
+    val obj3 = head()
     val key = 20
     val key2 = 25
     // Making half links to connect obj1 and obj2
@@ -147,6 +147,6 @@ fun twoConnectedeCubes(): ConnectableObject {
     obj2.halfLink(key2).addRotationAxis(key2, Coordinate(1.0,0.0,0.0,1.0))
 
     // scaling model vertices to be able to see smthng at all
-    obj1.scaleModel(100.0, 100.0, 100.0, TransformationInfo.empty())
+//    obj1.scaleModel(100.0, 100.0, 100.0, TransformationInfo.empty())
     return obj1
 }
