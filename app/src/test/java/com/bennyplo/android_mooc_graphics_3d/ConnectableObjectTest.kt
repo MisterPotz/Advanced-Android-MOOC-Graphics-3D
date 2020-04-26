@@ -124,7 +124,7 @@ class ConnectableObjectTest {
     fun scaleSingleGlobal() {
         val obj = square()
 
-        obj.scaleGlobal(20.0)
+        obj.scaleGlobal(20.0, 20.0, 20.0)
 
         val modelExpected = arrayOf(
                 Coordinate(-20.0, -20.0, 20.0, 1.0),
@@ -160,7 +160,7 @@ class ConnectableObjectTest {
 
         obj.halfLink(key).connectTo(obj2.halfLink(key))
 
-        obj.scaleGlobal(20.0)
+        obj.scaleGlobal(20.0, 20.0, 20.0)
         // изменение в моделе должны сразу писаться в глобал
         val global1Expected = arrayOf(
                 Coordinate(-20.0, -20.0, 20.0, 1.0),
@@ -250,7 +250,7 @@ class ConnectableObjectTest {
 
         obj.halfLink(key).connectTo(obj2.halfLink(key))
 
-        obj.scaleGlobal(20.0)
+        obj.scaleGlobal(20.0, 20.0, 20.0)
         obj.translateGlobal(500.0, 500.0, 0.0)
         // изменение в моделе должны сразу писаться в глобал
         val global1Expected = arrayOf(
@@ -654,7 +654,6 @@ class ConnectableObjectTest {
         obj2.halfLink(key2).connectTo(obj3.halfLink(key2))
 
 
-
         val currentModel3 = arrayOf(
                 Coordinate(1.0, 1.0, 1.0, 1.0),
                 Coordinate(1.0, 3.0, 1.0, 1.0),
@@ -753,7 +752,7 @@ class ConnectableObjectTest {
         obj2.addHalfLink(key, Coordinate(0.0, -1.0, 1.0, 1.0))
         obj.halfLink(key).connectTo(obj2.halfLink(key))
 
-        obj.halfLink(key).addRotationAxis(key, Coordinate(0.0, 1.0, 0.0,1.0))
+        obj.halfLink(key).addRotationAxis(key, Coordinate(0.0, 1.0, 0.0, 1.0))
         obj.halfLink(key).rotateOtherAroundAxisModel(key, 90.0)
 
         val model2Expected = arrayOf(
@@ -764,5 +763,79 @@ class ConnectableObjectTest {
         )
 
         assertArrayEquals(model2Expected, obj2.model)
+    }
+
+    @Test
+    fun rotateWithTranslationOnly() {
+        val obj = square()
+        val obj2 = square()
+        val obj3 = square()
+        val key = 20
+        val key2 = 21
+        obj.addHalfLink(key, Coordinate(0.0, 1.0, 1.0, 1.0))
+        obj2.addHalfLink(key, Coordinate(0.0, -1.0, 1.0, 1.0))
+        obj2.addHalfLink(key2, Coordinate(1.0, 1.0, 1.0, 1.0))
+
+        obj.halfLink(key).addRotationAxis(key, Coordinate(0.0, 1.0, 0.0, 0.0))
+
+        obj.halfLink(key).connectTo(obj2.halfLink(key))
+
+        obj3.addHalfLink(key2, Coordinate(0.0, -1.0, 1.0, 1.0))
+        obj2.halfLink(key2).connectTo(obj3.halfLink(key2))
+
+        val modelExpected1 = arrayOf(
+                Coordinate(-1.0, -1.0, 1.0, 1.0),
+                Coordinate(-1.0, 1.0, 1.0, 1.0),
+                Coordinate(1.0, 1.0, 1.0, 1.0),
+                Coordinate(1.0, -1.0, 1.0, 1.0)
+        )
+        val model2Expected = arrayOf(
+                Coordinate(-1.0, 1.0, 1.0, 1.0),
+                Coordinate(-1.0, 3.0, 1.0, 1.0),
+                Coordinate(1.0, 3.0, 1.0, 1.0),
+                Coordinate(1.0, 1.0, 1.0, 1.0)
+        )
+
+        val modelExpected3 = arrayOf(
+                Coordinate(0.0, 3.0, 1.0, 1.0),
+                Coordinate(0.0, 5.0, 1.0, 1.0),
+                Coordinate(2.0, 5.0, 1.0, 1.0),
+                Coordinate(2.0, 3.0, 1.0, 1.0)
+        )
+        assertArrayEquals(modelExpected1, obj.model)
+        assertArrayEquals(model2Expected, obj2.model)
+        assertArrayEquals(modelExpected3, obj3.model)
+
+        // 0
+        //0
+        //0
+        obj.halfLink(key).rotateOtherSilentlyModel(key, 90.0)
+        //   0
+        //   |
+        //   0
+
+        val expected1 = arrayOf(
+                Coordinate(-1.0, -1.0, 1.0, 1.0),
+                Coordinate(-1.0, 1.0, 1.0, 1.0),
+                Coordinate(1.0, 1.0, 1.0, 1.0),
+                Coordinate(1.0, -1.0, 1.0, 1.0)
+        )
+        val expected2 = arrayOf(
+                Coordinate(0.0, 1.0, 2.0, 1.0),
+                Coordinate(0.0, 3.0, 2.0, 1.0),
+                Coordinate(0.0, 3.0, 0.0, 1.0),
+                Coordinate(0.0, 1.0, 0.0, 1.0)
+        )
+
+        val expected3 = arrayOf(
+                Coordinate(-1.0, 3.0, 0.0, 1.0),
+                Coordinate(-1.0, 5.0, 0.0, 1.0),
+                Coordinate(1.0, 5.0, 0.0, 1.0),
+                Coordinate(1.0, 3.0, 0.0, 1.0)
+        )
+
+        assertArrayEquals(expected1, obj.model)
+        assertArrayEquals(expected2, obj2.model)
+        assertArrayEquals(expected3, obj3.model)
     }
 }

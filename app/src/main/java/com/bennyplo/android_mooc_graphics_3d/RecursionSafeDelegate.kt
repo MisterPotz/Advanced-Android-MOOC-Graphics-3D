@@ -9,7 +9,8 @@ abstract class RecursionSafeDelegate<T : ParameterScope>(
 
     fun wasAlreadyPerformed(record: TransformationInfo): Boolean {
         if (connectableObject in record.objs.keys &&
-                (!record.objs[connectableObject]!!.mustBeExecuted || record.objs[connectableObject]!!.isBlocking)) {
+                (!record.objs[connectableObject]!!.mustBeExecuted ||
+                        (record.objs[connectableObject]!!.isBlocking && !record.objs[connectableObject]!!.mustBeExecuted))) {
             return true
         }
         return false
@@ -45,6 +46,15 @@ abstract class RecursionSafeDelegate<T : ParameterScope>(
         }
     }
 
+    private fun shallContinue(record: TransformationInfo) : Boolean{
+        if (connectableObject in record.objs) {
+            if (record.objs[connectableObject]!!.isBlocking) {
+                return false
+            }
+        }
+        return true
+    }
+
     private fun performOnOthers(others: Collection<ConnectableObject?>, record: TransformationInfo, scope: T) {
         for (i in others) {
             i?.let {
@@ -61,7 +71,9 @@ abstract class RecursionSafeDelegate<T : ParameterScope>(
             return
         }
         val exceptNew = performSafely(record, scope)
-        performOnOthers(others, record, scope)
+        if (shallContinue(exceptNew)) {
+            performOnOthers(others, exceptNew, scope)
+        }
     }
 }
 

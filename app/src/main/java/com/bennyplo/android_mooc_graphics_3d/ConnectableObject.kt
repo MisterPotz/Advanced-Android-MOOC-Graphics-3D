@@ -10,7 +10,10 @@ import com.bennyplo.android_mooc_graphics_3d.scopes.*
  * [isBlocking] - represents if recursion shoud stop if object with this tag should end
  * [mustBeExecuted] - represents if object still has to be processed
  */
-data class PerObjectTransformationInfo(val isBlocking: Boolean = false, val mustBeExecuted: Boolean = true)
+data class PerObjectTransformationInfo(
+        val isBlocking: Boolean = false,
+        val mustBeExecuted: Boolean = true,
+        val onlyTranslate: Boolean = false)
 
 // TODO fix logics to take this into account
 data class TransformationInfo(val objs: MutableMap<ConnectableObject, PerObjectTransformationInfo>) {
@@ -78,7 +81,7 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
 
     abstract fun rawDraw(canvas: Canvas)
 
-    private fun getAllOthers() = links.map { it.value.getOtherParent() }
+    internal fun getAllOthers() = links.map { it.value.getOtherParent() }
 
     /**
      * [parent] - is the object that initialized drawing, we must know a pointer to him
@@ -153,7 +156,7 @@ abstract class ConnectableObject(local: Array<Coordinate?>, setupPaint: Paint.()
     /**
      * Scales all objects that are somehow connected
      */
-    override fun scaleGlobal(times: Double, dy: Double, dz : Double) {
+    override fun scaleGlobal(times: Double, dy: Double, dz: Double) {
         // that is wrong - can't change model from global
         scaleGlobal(times, dy, dz, createEmptyTransformation())
     }
@@ -305,6 +308,55 @@ class HalfLink(val parent: ConnectableObject, val local: Coordinate) {
         other.rotateAxisGlobal(theta, axes[key]!!.global, parent.recordBlocking())
 
         other.translateGlobal(global.x, global.y, global.z, parent.recordBlocking())
+    }
+
+    // Rotates only linked object, objects that are connected with it will be translated to new position
+    // but not rotated
+    fun rotateOtherSilentlyModel(key: Int, theta: Double) {
+        fun recordOnlyOtherAsExecutable(): TransformationInfo {
+            val other = getOtherParent()!!
+            val blocked = other.getAllOthers().filterNotNull()
+            // mapping blocked transformations
+            val blockedMap = blocked
+                    .fold(mutableMapOf<ConnectableObject, PerObjectTransformationInfo>()) { map, obj ->
+                        map.put(obj, PerObjectTransformationInfo(isBlocking = true, mustBeExecuted = false, onlyTranslate = true)); map
+                    }
+            return TransformationInfo(blockedMap)
+        }
+
+        val other = getOtherParent() ?: return
+
+        // saving old links positions to calculate the difference after
+        val saved = other.links.toList().fold(mutableMapOf<Int, Coordinate>()) { map, halflink ->
+            map.put(halflink.first, halflink.second.model.copy())
+            map
+        }
+
+        // making this joint to be center of rotation, also block all linked nodes - they will not be rotated
+        other.translateModel(-model.x, -model.y, -model.z, recordOnlyOtherAsExecutable())
+        // set this parent as blocking for this operation, when it will be tried to rotated it will not begin
+        // the rotation operation
+        other.rotateAxisModel(theta, axes[key]!!.model, recordOnlyOtherAsExecutable())
+
+        other.translateModel(model.x, model.y, model.z, recordOnlyOtherAsExecutable())
+
+        // now calculate difference between old positions and new
+        val newPos = other.links.toList().fold(mutableMapOf<Int, Coordinate>()) { map, halflink ->
+            map.put(halflink.first, halflink.second.model.copy())
+            map
+        }
+        // вычисляем разницу для каждого узла и перемещаем вещи в новые места
+        saved.forEach {
+            val newCoordinate = newPos[it.key]
+            val curr = it.value
+            val dx = newCoordinate!!.x - curr.x
+            val dy = newCoordinate!!.y - curr.y
+            val dz = newCoordinate!!.z - curr.z
+            val w = 1
+            other.links[it.key]!!.getOtherParent()!!.let {
+                it.translateModel(dx, dy, dz, other.recordThis(PerObjectTransformationInfo(isBlocking = true, mustBeExecuted = false)))
+            }
+        }
     }
 
     /**

@@ -30,16 +30,14 @@ class AcceptingDrawView(context: Context) : View(context) {
 //    var view: AcceptingDrawView? = null
 
     init {
-        //obj.scaleModel(0.1, 0.1, 0.1, TransformationInfo.empty())
+        robot.getMain().scaleModel(0.1,0.1,0.1, TransformationInfo.empty())
+        robot.rotateLeftLeg(90.0, 5000)
     }
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
-//        link1.rotateOtherAroundAxisModel(key, relative1)
-//        link2.rotateOtherAroundAxisModel(key2, relative2)
-
+        robot.executeIfActive()
         resetAll()
-        robot.getMain().scaleGlobal(100.0, 100.0, 100.0)
 
 //        obj.rotateAxisGlobal(global, Coordinate(1.0, 0.0, 0.0, 1.0), TransformationInfo.empty())
 //        obj.translateGlobal(0.0,0.0, -1.6)
@@ -49,6 +47,11 @@ class AcceptingDrawView(context: Context) : View(context) {
 //        obj.projectToGlobal(ProjectionBesicParameters(1.0, -1.0, -1.0, 1.0, 1.0, 2.0), TransformationInfo.empty())
 //        obj.scaleGlobal(1000.0)
         robot.getMain().rotateAxisGlobal(30.0, Coordinate(1.0,1.0,0.0,1.0))
+
+        robot.getMain().translateGlobal(0.0,0.0, -1.2)
+        robot.getMain().projectToGlobal(ProjectionBesicParameters(-1.0, 1.0, 1.0, -1.0, 1.0, 2.0), TransformationInfo.empty())
+
+        robot.getMain().scaleGlobal(1500.0, 1500.0, 1500.0)
         robot.getMain().scaleGlobal(1.0,-1.0,1.0)
         placeInCenter()
         drawAll(canvas)

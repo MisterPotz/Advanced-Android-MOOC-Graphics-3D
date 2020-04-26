@@ -95,7 +95,7 @@ class Body() : CubeLike(
 //    val rightLegLink = 41
 
     init {
-        addHalfLink(neckLink, Coordinate(0.0,0.8,0.0,1.0))
+        addHalfLink(neckLink, Coordinate(0.0, 0.8, 0.0, 1.0))
         addHalfLink(leftArmLink, Coordinate(0.5, 0.6, 0.0, 1.0))
         addHalfLink(rightArmLink, Coordinate(-0.5, 0.6, 0.0, 1.0))
 
@@ -116,10 +116,28 @@ class LowerBody() : CubeLike(
     val leftLegLink = 40
     val rightLegLink = 41
 
+    val leftLeg = Leg(false)
+    val rightLeg = Leg(true)
+
     init {
-        addHalfLink(bodyLink, Coordinate(0.0,0.18,0.0,1.0))
+        addHalfLink(bodyLink, Coordinate(0.0, 0.18, 0.0, 1.0))
         addHalfLink(leftLegLink, Coordinate(0.25, -0.18, 0.0, 1.0))
         addHalfLink(rightLegLink, Coordinate(-0.25, -0.18, 0.0, 1.0))
+
+        halfLink(leftLegLink).addRotationAxis(leftLeg.xAxis, Coordinate(1.0,0.0,0.0,1.0))
+        halfLink(rightLegLink).addRotationAxis(rightLeg.xAxis, Coordinate(1.0,0.0,0.0,1.0))
+
+        halfLink(leftLegLink).connectTo(leftLeg.halfLink(leftLeg.lowerBodyLink))
+        halfLink(rightLegLink).connectTo(rightLeg.halfLink(rightLeg.lowerBodyLink))
+    }
+
+    /**
+     * angle in degrees
+     */
+    fun raiseOnlyHigh(isRight: Boolean, degrees: Double) {
+        val legToRaise = if (isRight) rightLeg else leftLeg
+        val legLink = if (isRight) rightLegLink else leftLegLink
+        halfLink(legLink).rotateOtherSilentlyModel(legToRaise.xAxis, -degrees)
     }
 }
 
@@ -137,12 +155,15 @@ class Leg(val rightLeg: Boolean) : CubeLike(
 
     val lowerLeg = LowerLeg()
 
-    init {
-        addHalfLink(lowerBodyLink, Coordinate(0.0,0.65,0.0,1.0))
-        addHalfLink(lowerLegLink, Coordinate(0.0,-0.65,0.0,1.0))
+    val xAxis = 12
 
+    init {
+        addHalfLink(lowerBodyLink, Coordinate(0.0, 0.65, 0.0, 1.0))
+        addHalfLink(lowerLegLink, Coordinate(0.0, -0.65, 0.0, 1.0))
+        halfLink(lowerLegLink).addRotationAxis(xAxis, Coordinate(1.0, 0.0, 0.0, 1.0))
         halfLink(lowerLegLink).connectTo(lowerLeg.halfLink(lowerLeg.upperLegLink))
     }
+
 }
 
 
@@ -161,8 +182,8 @@ class LowerLeg() : CubeLike(
     val foot = Foot()
 
     init {
-        addHalfLink(upperLegLink, Coordinate(0.0,0.7,0.0,1.0))
-        addHalfLink(footLink, Coordinate(0.0,-0.7,0.0,1.0))
+        addHalfLink(upperLegLink, Coordinate(0.0, 0.7, 0.0, 1.0))
+        addHalfLink(footLink, Coordinate(0.0, -0.7, 0.0, 1.0))
 
         halfLink(footLink).connectTo(foot.halfLink(foot.lowerLeg))
     }
@@ -180,7 +201,7 @@ class Foot() : CubeLike(
     val lowerLeg = 125
 
     init {
-        addHalfLink(lowerLeg, Coordinate(0.0,0.1,-0.1,1.0))
+        addHalfLink(lowerLeg, Coordinate(0.0, 0.1, -0.1, 1.0))
     }
 }
 
@@ -197,13 +218,16 @@ class Arm(val rightArm: Boolean) : CubeLike(
     val lowerArmLink = 101
 
     val lowerArm = LowerArm()
+
     init {
         var sign = if (rightArm) 1 else -1
-        addHalfLink(bodyLink, Coordinate(0.2 * sign,0.35,0.0,1.0))
-        addHalfLink(lowerArmLink, Coordinate(0.0,-0.4,0.0,1.0))
+        addHalfLink(bodyLink, Coordinate(0.2 * sign, 0.35, 0.0, 1.0))
+        addHalfLink(lowerArmLink, Coordinate(0.0, -0.4, 0.0, 1.0))
 
         halfLink(lowerArmLink).connectTo(lowerArm.halfLink(lowerArm.upperArmLink))
     }
+
+//    fun rotateLowerArm()
 }
 
 class LowerArm : CubeLike(
@@ -221,7 +245,7 @@ class LowerArm : CubeLike(
     val hand = Hand()
 
     init {
-        addHalfLink(upperArmLink, Coordinate(0.0,0.6,0.0,1.0))
+        addHalfLink(upperArmLink, Coordinate(0.0, 0.6, 0.0, 1.0))
         addHalfLink(handLink, Coordinate(0.0, -0.6, 0.0, 1.0))
 
         halfLink(handLink).connectTo(hand.halfLink(hand.lowerArm))
@@ -240,7 +264,7 @@ class Hand : CubeLike(
     val lowerArm = 102
 
     init {
-        addHalfLink(lowerArm, Coordinate(0.0,0.1,-0.1,1.0))
+        addHalfLink(lowerArm, Coordinate(0.0, 0.1, -0.1, 1.0))
     }
 }
 
