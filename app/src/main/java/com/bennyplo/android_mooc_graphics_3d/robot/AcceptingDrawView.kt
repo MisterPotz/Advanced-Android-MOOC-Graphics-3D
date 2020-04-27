@@ -31,7 +31,12 @@ class AcceptingDrawView(context: Context) : View(context) {
 
     init {
         robot.getMain().scaleModel(0.1,0.1,0.1, TransformationInfo.empty())
-        robot.rotateLeftLeg(90.0, 5000)
+
+        robot.rotateLeftLegSilently( 30.0, 1000, AxesType.X)
+        robot.rotateLowLegLeft(-30.0, 1000, AxesType.X)
+        robot.rotateRightLeg(40.0, 2000, AxesType.X)
+        robot.rotateLeftArmSilently(-45.0, 5000, AxesType.X)
+        robot.rotateLowArmRight(90.0, 2000, AxesType.Y)
     }
 
     @SuppressLint("DrawAllocation")
@@ -39,13 +44,6 @@ class AcceptingDrawView(context: Context) : View(context) {
         robot.executeIfActive()
         resetAll()
 
-//        obj.rotateAxisGlobal(global, Coordinate(1.0, 0.0, 0.0, 1.0), TransformationInfo.empty())
-//        obj.translateGlobal(0.0,0.0, -1.6)
-//
-//        global += ascendGlobal; if (global >= 360) global = 0.0
-//
-//        obj.projectToGlobal(ProjectionBesicParameters(1.0, -1.0, -1.0, 1.0, 1.0, 2.0), TransformationInfo.empty())
-//        obj.scaleGlobal(1000.0)
         robot.getMain().rotateAxisGlobal(30.0, Coordinate(1.0,1.0,0.0,1.0))
 
         robot.getMain().translateGlobal(0.0,0.0, -1.2)

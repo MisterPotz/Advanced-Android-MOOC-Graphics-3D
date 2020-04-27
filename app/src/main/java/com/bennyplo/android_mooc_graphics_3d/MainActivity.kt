@@ -1,11 +1,8 @@
 package com.bennyplo.android_mooc_graphics_3d
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import com.bennyplo.android_mooc_graphics_3d.robot.AcceptingDrawView
-import com.bennyplo.android_mooc_graphics_3d.robot.twoConnectedeCubes
 import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
