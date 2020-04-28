@@ -5,7 +5,7 @@ import com.bennyplo.android_mooc_graphics_3d.RecursionSafeDelegate
 import com.bennyplo.android_mooc_graphics_3d.scale
 
 class RecursionScaleGlobal(connectableObject: ConnectableObject) :
-        RecursionSafeDelegate<CoordinatesScope>(connectableObject, { obj, scope ->
+        RecursionSafeDelegate<CoordinatesScope>(connectableObject, { obj, scope, info ->
             obj.apply {
                 scope.apply {
                     // scale the vertices

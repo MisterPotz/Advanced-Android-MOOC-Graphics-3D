@@ -2,8 +2,7 @@ package com.bennyplo.android_mooc_graphics_3d
 
 
 import android.graphics.Canvas
-import org.junit.jupiter.api.Assertions.assertArrayEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
 
@@ -37,36 +36,36 @@ class MatrixUtilsKtTest {
 
     @Test
     fun project() {
-        val coordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -1.0, 1.0))
+        val coordinate: Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -1.0, 1.0))
         val newCoordinate = project(coordinate, -1.0, 1.0, 1.0, -1.0, 1.0, 10.0)
 //        newCoordinate[0]!!.Normalise()
-        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,-1.0,1.0)), newCoordinate)
+        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0, -1.0, 1.0)), newCoordinate)
 
-        val endCoordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
+        val endCoordinate: Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
         val newEndCoordinate = project(endCoordinate, -1.0, 1.0, 1.0, -1.0, 1.0, 10.0)
-        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,1.0,1.0)), newEndCoordinate)
+        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0, 1.0, 1.0)), newEndCoordinate)
 
     }
 
     @Test
     fun projectReverse() {
-        val coordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, 1.0, 1.0))
+        val coordinate: Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, 1.0, 1.0))
         val newCoordinate = project(coordinate, -1.0, 1.0, 1.0, -1.0, -1.0, 10.0)
 
 //        newCoordinate[0]!!.Normalise()
-        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,-1.0,1.0)), newCoordinate)
+        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0, -1.0, 1.0)), newCoordinate)
 
-        val endCoordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
+        val endCoordinate: Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
         val newEndCoordinate = project(endCoordinate, -1.0, 1.0, 1.0, -1.0, -1.0, 10.0)
-        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,1.0,1.0)), newEndCoordinate)
+        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0, 1.0, 1.0)), newEndCoordinate)
     }
 
     @Test
     fun projectScaled() {
-        val coordinate : Array<Coordinate?> = arrayOf(Coordinate(100.0, 100.0, -100.0, 1.0))
+        val coordinate: Array<Coordinate?> = arrayOf(Coordinate(100.0, 100.0, -100.0, 1.0))
         val newCoordinate = project(coordinate, 100.0, -100.0, -100.0, 100.0, -100.0, 100.0)
 //        newCoordinate[0]!!.Normalise()
-        assertArrayEquals(arrayOf(Coordinate(1.0, 1.0,1.0,1.0)), newCoordinate)
+        assertArrayEquals(arrayOf(Coordinate(1.0, 1.0, 1.0, 1.0)), newCoordinate)
 
 //        val endCoordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
 //        val newEndCoordinate = project(endCoordinate, -1.0, 1.0, 1.0, -1.0, 1.0, 10.0)
@@ -76,13 +75,23 @@ class MatrixUtilsKtTest {
 
     @Test
     fun scaleTo100AndProject() {
-        val coordinate : Array<Coordinate?> = arrayOf(Coordinate(1.0, 1.0, -100.0, 1.0))
+        val coordinate: Array<Coordinate?> = arrayOf(Coordinate(1.0, 1.0, -100.0, 1.0))
         val newCoordinate = project(coordinate, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0)
 //        newCoordinate[0]!!.Normalise()
-        assertArrayEquals(arrayOf(Coordinate(0.01, 0.01,0.01,1.0)), newCoordinate)
+        assertArrayEquals(arrayOf(Coordinate(0.01, 0.01, 0.01, 1.0)), newCoordinate)
 
 //        val endCoordinate : Array<Coordinate?> = arrayOf(Coordinate(0.0, 0.0, -10.0, 1.0))
 //        val newEndCoordinate = project(endCoordinate, -1.0, 1.0, 1.0, -1.0, 1.0, 10.0)
 //        assertArrayEquals(arrayOf(Coordinate(0.0, 0.0,1.0,1.0)), newEndCoordinate)
+    }
+
+    @Test
+    fun rotatePointAxis() {
+        val coordinate: Array<Coordinate?> = arrayOf(Coordinate( 1.0, 1.0, 0.0, 1.0))
+
+        val axis = Coordinate(1.0, 1.0, 0.0, 1.0)
+        val new = rotateAxis(coordinate, 90.0, axis)
+
+        assertArrayEquals(coordinate, new)
     }
 }

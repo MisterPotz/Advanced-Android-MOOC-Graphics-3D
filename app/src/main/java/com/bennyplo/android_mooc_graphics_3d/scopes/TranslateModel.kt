@@ -6,7 +6,7 @@ import com.bennyplo.android_mooc_graphics_3d.TransformationInfo
 import com.bennyplo.android_mooc_graphics_3d.translate
 
 class RecursionTranslationModel(connectableObject: ConnectableObject) :
-        RecursionSafeDelegate<CoordinatesScope>(connectableObject, { obj, scope ->
+        RecursionSafeDelegate<CoordinatesScope>(connectableObject, { obj, scope, _ ->
             obj.apply {
                 scope.apply {
                     model = translate(model, dx, dy, dz)

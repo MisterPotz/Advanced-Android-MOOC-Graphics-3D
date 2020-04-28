@@ -838,4 +838,173 @@ class ConnectableObjectTest {
         assertArrayEquals(expected2, obj2.model)
         assertArrayEquals(expected3, obj3.model)
     }
+
+    @Test
+    fun ex1Rotation() {
+        val obj = square()
+        val obj2 = square()
+        val key = 20
+
+        obj.addHalfLink(key, Coordinate(1.0, 1.0, 1.0, 1.0))
+        obj2.addHalfLink(key, Coordinate(1.0, -1.0, 1.0, 1.0))
+
+        obj.halfLink(key).addRotationAxis(key, Coordinate(1.0, -1.0, 0.0, 0.0))
+
+        obj.halfLink(key).connectTo(obj2.halfLink(key))
+
+        val modelExpected1 = arrayOf(
+                Coordinate(-1.0, -1.0, 1.0, 1.0),
+                Coordinate(-1.0, 1.0, 1.0, 1.0),
+                Coordinate(1.0, 1.0, 1.0, 1.0),
+                Coordinate(1.0, -1.0, 1.0, 1.0)
+        )
+        val modelExpected2 = arrayOf(
+                Coordinate(-1.0, 1.0, 1.0, 1.0),
+                Coordinate(-1.0, 3.0, 1.0, 1.0),
+                Coordinate(1.0, 3.0, 1.0, 1.0),
+                Coordinate(1.0, 1.0, 1.0, 1.0)
+        )
+        val expectedJoint = Coordinate(1.0, 1.0, 1.0, 1.0)
+        assertEquals(expectedJoint, obj.halfLink(key).model)
+        assertEquals(expectedJoint, obj2.halfLink(key).model)
+
+        assertArrayEquals(modelExpected1, obj.model)
+        assertArrayEquals(modelExpected2, obj2.model)
+
+        obj.halfLink(key).rotateOtherSilentlyModel(key, 90.0)
+
+        val model1Expected1 = arrayOf(
+                Coordinate(-1.0, -1.0, 1.0, 1.0),
+                Coordinate(-1.0, 1.0, 1.0, 1.0),
+                Coordinate(1.0, 1.0, 1.0, 1.0),
+                Coordinate(1.0, -1.0, 1.0, 1.0)
+        )
+        val model1Expected2 = arrayOf(
+                Coordinate(0.0, 2.0, -0.414213562, 1.0),
+                Coordinate(-1.0, 3.0, 1.0, 1.0),
+                Coordinate(0.0, 2.0, 2.414213562, 1.0),
+                Coordinate(1.0, 1.0, 1.0, 1.0)
+        )
+
+        assertArrayEquals(model1Expected1, obj.model)
+        assertArrayEquals(model1Expected2, obj2.model)
+
+//        obj.halfLink(key).rotateOtherSilentlyModel(key, -90.0)
+//
+//        for (i in 0..10000) {
+//            obj.halfLink(key).rotateOtherSilentlyModel(key, 90.0)
+//            obj.halfLink(key).rotateOtherSilentlyModel(key, -90.0)
+//            println("$i")
+//            assertArrayEquals(modelExpected1, obj.model)
+//            assertArrayEquals(modelExpected2, obj2.model)
+//        }
+    }
+
+    fun lineDiagonal(): ConnectableObject {
+        val line //the vertices of a 3D cube
+                : Array<Coordinate?> = run {
+            val arr = Array<Coordinate?>(size = 2) { null }
+            arr[0] = Coordinate(-1.0, 1.0, 0.0, 1.0)
+            arr[1] = Coordinate(1.0, -1.0, 0.0, 1.0)
+            arr
+        }
+
+        return object : ConnectableObject(line, {}) {
+            override fun rawDraw(canvas: Canvas) {
+                local.apply {
+                    drawLinePairs(canvas, this, 0, 1, paint)
+                }
+            }
+        }
+    }
+
+    fun line(): ConnectableObject {
+        val line //the vertices of a 3D cube
+                : Array<Coordinate?> = run {
+            val arr = Array<Coordinate?>(size = 2) { null }
+            arr[0] = Coordinate(0.0, 1.0, 0.0, 1.0)
+            arr[1] = Coordinate(0.0, -1.0, 0.0, 1.0)
+            arr
+        }
+
+        return object : ConnectableObject(line, {}) {
+            override fun rawDraw(canvas: Canvas) {
+                local.apply {
+                    drawLinePairs(canvas, this, 0, 1, paint)
+                }
+            }
+        }
+    }
+
+    fun center(): ConnectableObject {
+        val line //the vertices of a 3D cube
+                : Array<Coordinate?> = run {
+            val arr = Array<Coordinate?>(size = 1) { null }
+            arr[0] = Coordinate(0.0, 0.0, 0.0, 1.0)
+            arr
+        }
+
+        return object : ConnectableObject(line, {}) {
+            override fun rawDraw(canvas: Canvas) {
+            }
+        }
+    }
+
+    @Test
+    fun silentAndReal() {
+        val center = center()
+        val obj = lineDiagonal()
+        val obj2 = line()
+        val key = 20
+        val centerKey = 0
+
+        center.addHalfLink(centerKey, Coordinate(0.0,0.0,0.0,1.0))
+        obj.addHalfLink(key, Coordinate(1.0, -1.0, 0.0, 1.0))
+        obj.addHalfLink(centerKey, Coordinate(0.0,0.0,0.0,1.0))
+        obj2.addHalfLink(key, Coordinate(0.0, 0.0, 0.0, 1.0))
+
+        val model1Expected1 = arrayOf(
+                Coordinate(-1.0, 1.0, 0.0, 1.0),
+                Coordinate(1.0, -1.0, 0.0, 1.0)
+        )
+        val model1Expected2 = arrayOf(
+                Coordinate(1.0, 0.0, 0.0, 1.0),
+                Coordinate(1.0, -2.0, 0.0, 1.0)
+        )
+
+        obj.halfLink(key).addRotationAxis(key, Coordinate(1.0, 0.0, 0.0, 1.0))
+        center.halfLink(centerKey).addRotationAxis(centerKey, Coordinate(1.0, 1.0, 0.0,1.0))
+        obj.halfLink(key).connectTo(obj2.halfLink(key))
+        center.halfLink(centerKey).connectTo(obj.halfLink(centerKey))
+
+        assertArrayEquals(model1Expected1, obj.model)
+        assertArrayEquals(model1Expected2, obj2.model)
+
+        center.halfLink(centerKey).rotateOtherSilentlyModel(centerKey, 90.0)
+
+        val model2Expected1 = arrayOf(
+                Coordinate(0.0, 0.0, 1.41421356, 1.0),
+                Coordinate(0.0, 0.0, -1.41421356, 1.0)
+        )
+        val model2Expected2 = arrayOf(
+                Coordinate(0.0, 1.0, -1.41421356, 1.0),
+                Coordinate(0.0, -1.0, -1.41421356, 1.0)
+        )
+        assertArrayEquals(model2Expected1, obj.model)
+        assertArrayEquals(model2Expected2, obj2.model)
+
+        obj.halfLink(key).rotateOtherAroundAxisModel(key, 90.0)
+
+        val model3Expected1 = arrayOf(
+                Coordinate(0.0, 0.0, 1.41421356, 1.0),
+                Coordinate(0.0, 0.0, -1.41421356, 1.0)
+        )
+        val model3Expected2 = arrayOf(
+                Coordinate(0.0, 0.0, -0.41421356, 1.0),
+                Coordinate(0.0, 0.0, -2.41421356, 1.0)
+        )
+
+        assertArrayEquals(model3Expected1, obj.model)
+        assertArrayEquals(model3Expected2, obj2.model)
+    }
 }

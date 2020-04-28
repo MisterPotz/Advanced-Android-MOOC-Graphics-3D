@@ -95,10 +95,10 @@ class Body() : CubeLike(
     val rightArmLink = 31
 
     val leftArm = Arm(rightArm = false)
-    val leftArmAxes = AxisSaver(1000, 1001, 1002)
+    val leftArmAxes = AxisSaver(1000, 1001, 1002, 999)
 
     val rightArm = Arm(rightArm = true)
-    val rightArmAxes = AxisSaver(1005, 1006, 1007)
+    val rightArmAxes = AxisSaver(1005, 1006, 100, 997)
 
     val lowerBodyLink = 35
 
@@ -114,6 +114,7 @@ class Body() : CubeLike(
                 addXTo(it)
                 addYTo(it)
                 addZTo(it)
+                addEx1To(it)
             }
         }
 
@@ -122,8 +123,10 @@ class Body() : CubeLike(
                 addXTo(it)
                 addYTo(it)
                 addZTo(it)
+                addEx1To(it)
             }
         }
+
 
         halfLink(rightArmLink).connectTo(rightArm.halfLink(rightArm.bodyLink))
         halfLink(leftArmLink).connectTo(leftArm.halfLink(leftArm.bodyLink))

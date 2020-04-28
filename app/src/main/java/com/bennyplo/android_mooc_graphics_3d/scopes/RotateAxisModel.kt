@@ -5,7 +5,7 @@ import com.bennyplo.android_mooc_graphics_3d.*
 data class RotationScope(val theta: Double, val axis: Coordinate) : ParameterScope
 
 class RecursionRotateAxisModel(connectableObject: ConnectableObject) :
-        RecursionSafeDelegate<RotationScope>(connectableObject, { obj, scope ->
+        RecursionSafeDelegate<RotationScope>(connectableObject, { obj, scope, info ->
             obj.apply {
                 scope.apply {
                     // rotate
@@ -13,7 +13,7 @@ class RecursionRotateAxisModel(connectableObject: ConnectableObject) :
                     global = model.copyOf()
                     // scale joints coordinate positions
                     for (i in links) {
-                        i.value.rotateAxisModel(theta, axis)
+                        i.value.rotateAxisModel(theta, axis, info?.rotateAxes ?: true)
                     }
                 }
             }

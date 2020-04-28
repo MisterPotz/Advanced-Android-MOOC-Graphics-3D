@@ -36,9 +36,10 @@ public class Coordinate {
     }
 
     public void normalizeVec() {
-        if (abs(x) <= 1 && abs(y) <= 1 && abs(z) <= 1) {
+/*        if (abs(x) <= 1 && abs(y) <= 1 && abs(z) <= 1) {
             return;
-        }
+        }*/
+
         double len = Math.sqrt(x * x + y * y + z * z);
         x = x / len;
         y = y / len;

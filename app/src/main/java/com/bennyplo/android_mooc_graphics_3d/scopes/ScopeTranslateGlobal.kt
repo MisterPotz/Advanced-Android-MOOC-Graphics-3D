@@ -5,7 +5,7 @@ import com.bennyplo.android_mooc_graphics_3d.*
 data class CoordinatesScope(val dx : Double, val dy: Double, val dz: Double) : ParameterScope
 
 class RecursionTranslationGlobal(connectableObject: ConnectableObject) :
-        RecursionSafeDelegate<CoordinatesScope>(connectableObject, { obj, scope ->
+        RecursionSafeDelegate<CoordinatesScope>(connectableObject, { obj, scope, _ ->
     obj.apply {
         scope.apply {
             global = translate(global,  dx, dy, dz)

@@ -45,6 +45,15 @@ class MediatorActionExecutor(val standardDelay: Long) {
         actionExecutor.startExecuting(totalTime, action)
     }
 
+    fun postAction(totalTime: Long, action: (Long) -> Unit, callback: () -> Unit) {
+        val actionExecutor = ActionExecutor(standardDelay) {
+            callback()
+        }
+        executorsList.add(actionExecutor)
+        actionExecutor.startExecuting(totalTime, action)
+    }
+
+
     fun execute() {
         executorsList.filter {
             !it.executeIfActive()

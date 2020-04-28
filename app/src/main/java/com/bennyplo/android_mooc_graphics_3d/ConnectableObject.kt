@@ -13,7 +13,9 @@ import com.bennyplo.android_mooc_graphics_3d.scopes.*
 data class PerObjectTransformationInfo(
         val isBlocking: Boolean = false,
         val mustBeExecuted: Boolean = true,
-        val onlyTranslate: Boolean = false)
+        val onlyTranslate: Boolean = false,
+        val rotateAxes: Boolean = true
+)
 
 // TODO fix logics to take this into account
 data class TransformationInfo(val objs: MutableMap<ConnectableObject, PerObjectTransformationInfo>) {
@@ -250,27 +252,29 @@ class HalfLink(val parent: ConnectableObject, val local: Coordinate) {
         global = translate(arrayOf(global), dx, dy, dz)[0]!!
     }
 
-    fun rotateAxisModel(theta: Double, axis: Coordinate) {
+    fun rotateAxisModel(theta: Double, axis: Coordinate, rotateAxes: Boolean) {
         model = rotateAxis(arrayOf(model), theta, axis)[0]!!
-        rotateAxesModel(theta, axis)
+        rotateAxesModel(theta, axis, rotateAxes)
         global = model.copy()
     }
 
-    private fun rotateAxesModel(theta: Double, axis: Coordinate) {
-        for (i in axes) {
-            i.value.rotateModel(theta, axis)
+    private fun rotateAxesModel(theta: Double, axis: Coordinate, rotateAxes: Boolean) {
+        if (rotateAxes) {
+            for (i in axes) {
+                i.value.rotateModel(theta, axis)
+            }
         }
     }
 
-    private fun rotateAxesGlobal(theta: Double, axis: Coordinate) {
+    private fun rotateAxesGlobal(theta: Double, axis: Coordinate, rotateAxes: Boolean) {
         for (i in axes) {
             i.value.rotateGlobal(theta, axis)
         }
     }
 
-    fun rotateAxisGlobal(theta: Double, axis: Coordinate) {
+    fun rotateAxisGlobal(theta: Double, axis: Coordinate, rotateAxes: Boolean = true) {
         global = rotateAxis(arrayOf(global), theta, axis)[0]!!
-        rotateAxesGlobal(theta, axis)
+        rotateAxesGlobal(theta, axis, rotateAxes)
     }
 
     // to change only global
@@ -336,7 +340,10 @@ class HalfLink(val parent: ConnectableObject, val local: Coordinate) {
         other.translateModel(-model.x, -model.y, -model.z, recordOnlyOtherAsExecutable())
         // set this parent as blocking for this operation, when it will be tried to rotated it will not begin
         // the rotation operation
-        other.rotateAxisModel(theta, axes[key]!!.model, recordOnlyOtherAsExecutable())
+        other.rotateAxisModel(theta, axes[key]!!.model.copy(), recordOnlyOtherAsExecutable().apply {
+            objs.put(other, PerObjectTransformationInfo(true, mustBeExecuted = true,
+                    rotateAxes = false))
+        })
 
         other.translateModel(model.x, model.y, model.z, recordOnlyOtherAsExecutable())
 

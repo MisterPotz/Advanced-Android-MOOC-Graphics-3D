@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         CoroutineScope(Dispatchers.Default).launch {
             while (isActive) {
                 view!!.invalidate()
-                delay(16)
+                delay(30)
             }
         }
     }

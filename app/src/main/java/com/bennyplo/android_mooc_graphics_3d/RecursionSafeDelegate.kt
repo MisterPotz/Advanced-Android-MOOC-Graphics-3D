@@ -4,7 +4,7 @@ import java.lang.IllegalStateException
 
 abstract class RecursionSafeDelegate<T : ParameterScope>(
         private val connectableObject: ConnectableObject,
-        private val performSafelyBlock: (obj: ConnectableObject, scope: T) -> Unit,
+        private val performSafelyBlock: (obj: ConnectableObject, scope: T, info : PerObjectTransformationInfo?) -> Unit,
         private val performOnOthersBlock: (obj: ConnectableObject, scope: T, record: TransformationInfo) -> Unit) {
 
     fun wasAlreadyPerformed(record: TransformationInfo): Boolean {
@@ -21,7 +21,7 @@ abstract class RecursionSafeDelegate<T : ParameterScope>(
             parameterScope: T
     ): TransformationInfo {
         if (!wasAlreadyPerformed(record)) {
-            performSafelyBlock(connectableObject, parameterScope)
+            performSafelyBlock(connectableObject, parameterScope, record.objs[connectableObject])
         } else {
             // if this object was already once drawn - escape drawing recursion
             throw IllegalStateException("this object was already processed")

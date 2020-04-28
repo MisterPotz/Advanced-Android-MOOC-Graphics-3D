@@ -6,7 +6,7 @@ import com.bennyplo.android_mooc_graphics_3d.rotateAxis
 
 
 class RecursionLocalToModel(connectableObject: ConnectableObject) :
-        RecursionSafeDelegate<ScopeMtG>(connectableObject, { obj, scope ->
+        RecursionSafeDelegate<ScopeMtG>(connectableObject, { obj, scope, info ->
             obj.apply {
                 scope.apply {
                     model = local.copyOf()
